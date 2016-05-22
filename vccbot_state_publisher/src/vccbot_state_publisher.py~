@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+import rospy
+from std_srvs.srv import Empty
+from vccbot_msgs import GlobalState
+
+currentState = GlobalState.UNKNOWN
+
+def service_move(msg):
+	global currentState
+	currentState = GlobalState.MOVE
+
+def service_waiting(msg):
+	global currentState
+	currentState = GlobalState.WAITING
+
+def service_spin(msg):
+	global currentState
+	currentState = GlobalState.SPIN
+
+def service_display(msg):
+	global currentState
+	currentState = GlobalState.DISPLAY
+
+	
+def main():
+	global_state_publisher = rospy.Publisher('/global_state', GlobalState, queue_size = 10)
+	rospy.init_node('vccbot_state_publisher')
+	move = rospy.Service('move', 

@@ -1,0 +1,27 @@
+TODO 
+Odometry track - done
+Spin - done
+move dist - done
+
+Migrate vccbot_button and vccbot_display to global state srv. button - done display - done
+Finish package.xml files
+vsp - done
+vm - done
+vb - done
+vd - done
+vl - done
+vmsgs - done
+
+Test catkin_make - done
+
+
+
+License is GPLv3
+
+On vccbot_button/CMakeLists.txt line 51 uncomment AdafruitBBIO when compiling on BBB
+
+
+
+Notes:
+Camera image is on /usb_cam/image_raw
+

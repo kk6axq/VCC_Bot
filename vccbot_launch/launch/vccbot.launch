@@ -1,0 +1,23 @@
+<launch>
+	
+	<include file="$(find ca_driver)/launch/create_2.launch"/>
+	
+	<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    		<param name="video_device" value="/dev/video0" />
+    		<param name="image_width" value="320" />
+    		<param name="image_height" value="240" />
+    		<param name="pixel_format" value="yuyv" />
+    		<param name="camera_frame_id" value="usb_cam" />
+    		<param name="io_method" value="mmap"/>
+		<param name="framerate" value="5"/>
+  	</node>	
+
+	<node pkg="vccbot_state_publisher" type="vccbot_state_publisher.py" name="vccbot_state_publisher"/>
+		
+	<node pkg="vccbot_button" type="vccbot_button.py" name="vccbot_button"/>
+	<node pkg="vccbot_move" type="vccbot_move.py" name="vccbot_move"/>
+	<node pkg="vccbot_display" type="vccbot_display.py" name="vccbot_display"/>
+	
+
+
+</launch>
