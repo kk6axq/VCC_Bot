@@ -1,1 +1,3 @@
 create_autonomy
+*.swp
+*.py[oc]
