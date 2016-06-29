@@ -1,3 +1,6 @@
 create_autonomy
 *.swp
 *.py[oc]
+robot_upstart
+vccbot_runtime_debug
+
