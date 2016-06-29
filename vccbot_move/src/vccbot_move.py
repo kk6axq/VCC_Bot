@@ -5,6 +5,8 @@ from vccbot_msgs.msg import GlobalState
 from nav_msgs.msg import Odometry
 from std_srvs.srv import Empty
 import time
+import os
+os.system("echo \"\" > /home/ubuntu/vccbot_move_log.txt")
 #Variables that need to be changed by the user:
 moveSpeed = 0.05# Speed to drive at. Units in m/s.
 rotationSpeed = 0.5#Speed of rotation in rad/s
@@ -19,12 +21,19 @@ UNKNOWN=4
 currentGlobalState=UNKNOWN
 time_at_beginning_spin = 0
 firstSpin = True
-maxDist = 1
+maxDist = 0.5#0.5 meters
+f = open("/home/ubuntu/vccbot_move_log.txt", "r+")
+def logMessage(message):
+	f.write(message)
+	print "Vccbot_move: MESSAGE: " + message
+
+
 #Variables and function for the odometry/distance measurement system
 rotNotDone = True
 initialOdometryDist = 0
 currentOdomDist = 0
 odomFirst = True
+odomOffset = 0
 def odometryCallback(data):
 	global currentGlobalState
 	global currentOdomDist
@@ -35,11 +44,14 @@ def odometryCallback(data):
 	global UNKNOWN
 	global maxDist
 	global odomFirst
+	global mode_change_spin
+	global odomOffset
 	if odomFirst:
 		odomFirst = False
 		odomOffset = data.pose.pose.position.x
 
 	currentOdomDist = data.pose.pose.position.x - odomOffset#get current forward distance value from odometry. +X is forward. This is in meters.
+	logMessage("currentOdomDist: " + str(currentOdomDist))
 	if currentOdomDist > maxDist and currentGlobalState == MOVING:
 			mode_change_spin()
 
@@ -60,6 +72,7 @@ def globalStateCallback(data):
 	global UNKNOWN	
 	currentGlobalState = data.globalstate
 	rospy.loginfo("Updated current global state to %s", currentGlobalState)
+	#logMessage("updated global state to: " + str(currentGlobalState))
 	
 #Variables and functions for the Twist publisher system
 
@@ -78,6 +91,10 @@ def main():
 	rospy.wait_for_service('waiting')
 	rospy.wait_for_service('display')
 	rospy.wait_for_service('spin')
+	global mode_change_move
+	global mode_change_waiting
+	global mode_change_spin
+	global mode_change_display
 	mode_change_move = rospy.ServiceProxy('move', Empty)
 	mode_change_waiting = rospy.ServiceProxy('waiting', Empty)
 	mode_change_spin = rospy.ServiceProxy('spin', Empty)
@@ -93,7 +110,8 @@ def main():
 	while not rospy.is_shutdown():
 		global moveSpeed
 		#The program doesn't need to shutdown so loop.
-		if currentGlobalState == MOVING: # The robot should move forward 
+		if currentGlobalState == MOVING: # The robot should move forward
+			#logMessage("Moving") 
 			#drive forward at a constant speed.
 			twist_message = Twist()#clear any previous data in the twist_message variable.
 			twist_message.linear.x = moveSpeed # These six lines create a Twist message that says move forward.
@@ -105,11 +123,14 @@ def main():
 			twist_publisher.publish(twist_message)
 		elif currentGlobalState == SPIN:# The robot needs to spin
 			if firstSpin == True:
+				logMessage("FirstSpin")
 				time_at_beginning_spin = time.time()
 				firstSpin = False
-			if firstSpin == False and time.time() - time_at_beginning_spin > 25.1328:
+			if firstSpin == False and time.time() - time_at_beginning_spin > 22:
+				logMessage("Spin2Display")				
 				mode_change_display()
 			else:
+				logMessage("Spinning")
 				twist_message = Twist()
 				twist_message.linear.x = 0
 				twist_message.linear.y = 0
